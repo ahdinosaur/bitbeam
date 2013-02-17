@@ -18,7 +18,7 @@
 include <units.scad>
 
 $beam_width = mm * 8;
-$beam_hole_radius = mm * 2.9;
+$beam_hole_radius = mm * 2.4;
 $beam_is_hollow = 0;
 $beam_wall_thickness = mm * 2;
 $beam_shelf_thickness = mm * 4;
