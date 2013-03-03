@@ -4,6 +4,16 @@
   <script src="lightgl.js"></script>
   <script src="csg.js"></script>
   <script src="openjscad.js"></script>
+    <script type="text/javascript">
+    /* <![CDATA[ */
+        (function() {
+            var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+            s.type = 'text/javascript';
+            s.async = true;
+            s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+            t.parentNode.insertBefore(s, t);
+        })();
+    /* ]]> */</script>
   <style>
 
 body {
@@ -79,7 +89,10 @@ function updateSolid()
 </head>
 <body onload="onload()">
   <h1>bitbeam OpenJsCad library</h1>
-<div id="viewer"></div>
+    <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://ahdinosaur.github.com/bitbeam/"></a>
+    <noscript><a href="http://flattr.com/thing/1157843/bitbeam-library" target="_blank">
+<img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript>
+  <div id="viewer"></div>
   <h2>source code</h2>
 below is the OpenJsCad script for this library. to build your own models, create a .jscad script and use the <a href="processfile.html"><b>OpenJsCad parser</b></a>. for more information see the <a href="index.html">OpenJsCad documentation</a>. 
 <br><br> 
