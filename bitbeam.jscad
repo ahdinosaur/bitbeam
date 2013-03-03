@@ -11,7 +11,7 @@
 // translateBeam(beam, [x, y, z]) - translate bitbeam struts in X, Y, or Z axes in units 'beam_width'
 
 var cylresolution=16;
-var beam_width=6;
+var beam_width=8;
 var hole_radius=2.4;
 
 // Here we define the user editable parameters: 
