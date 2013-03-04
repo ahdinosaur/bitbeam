@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html><head>
+  <script src="lightgl.js"></script>
+  <script src="csg.js"></script>
+  <script src="openjscad.js"></script>
+    <script type="text/javascript">
+    /* <![CDATA[ */
+        (function() {
+            var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+            s.type = 'text/javascript';
+            s.async = true;
+            s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+            t.parentNode.insertBefore(s, t);
+        })();
+    /* ]]> */</script>
+  <style>
+
+body {
+  font: 14px/20px 'Helvetica Neue Light', HelveticaNeue-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+pre, code, textarea {
+  font: 12px/20px Monaco, monospace;
+  border: 1px solid #CCC;
+  border-radius: 3px;
+  background: #F9F9F9;
+  padding: 0 3px;
+  color: #555;
+}
+pre, textarea {
+  padding: 10px;
+  width: 100%;
+}
+textarea {
+  height: 200px;
+}
+textarea:focus {
+  outline: none;
+}
+
+canvas { cursor: move; }
+
+  </style>
+<link rel="stylesheet" href="openjscad.css" type="text/css">
+
+<script>
+
+var gProcessor=null;
+
+// Show all exceptions to the user:
+OpenJsCad.AlertUserOfUncaughtExceptions();
+
+function onload()
+{
+    gProcessor = new OpenJsCad.Processor(document.getElementById("viewer"));
+    updateSolid();
+}
+
+function updateSolid()
+{
+    gProcessor.setJsCad(document.getElementById('code').value);
+}
+</script>
+<title>bitbeam OpenJsCad library</title>  
+</head>
+<body onload="onload()">
+  <h1>bitbeam OpenJsCad library</h1>
+    <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://ahdinosaur.github.com/bitbeam/"></a>
+    <noscript><a href="http://flattr.com/thing/1157843/bitbeam-library" target="_blank">
+<img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript>
+  <div id="viewer"></div>
+  <h2>source code</h2>
+below is the OpenJsCad script for this library. to build your own models, create a .jscad script and use the <a href="processfile.html"><b>OpenJsCad parser</b></a>. for more information see the <a href="index.html">OpenJsCad documentation</a>. 
+<br><br> 
+<textarea id="code">
+/*
+ *  OpenJsCad BitBeam Library (http://joostn.github.com/OpenJsCad/)
+ *  Copyright (C) 2013 Michael Williams
+ *
+ *  License: LGPL 2.1 or later
+*/
+
+// zBeam(length) - create a vertical bitbeam strut 'length' long
+// xBeam(length) - create a horizontal bitbeam strug along the X axis
+// yBeam(length) - create a horizontal bitbeam strut along the Y axis
+// .translateBeam([x, y, z]) - translate bitbeam struts in X, Y, or Z axes in units 'beam_width'
+
+var cylresolution=16;
+var beam_width=10;
+var hole_radius=2.4;
+var nut_radius=4.2;
+var nut_height=3.6;
+
+// Here we define the user editable parameters: 
+function getParameterDefinitions() {
+  return [
+    {
+      name: 'quality', 
+      type: 'choice',
+      caption: 'Quality',
+      values: [0, 1],
+      captions: ["Draft","High"], 
+      default: 0,
+    },    
+    { name: 'beam_width', caption: 'spacing between holes (in mm)', type: 'float', default: 10 },
+    { name: 'hole_radius', caption: 'radius of holes (in mm)', type: 'float', default: 2.4 },
+    { name: 'nut_radius', caption: 'radius of nut (in mm)', type: 'float', default: 4.2 },
+    { name: 'nut_height', caption: 'height of nut (in mm)', type: 'float', default: 3.6 },
+    { name: 'length', caption: 'length of beam (in num of hole spaces)', type: 'int', default: 10 },
+    { name: 'xHoles', caption: 'vertical screw holes (indexes starting at 0)', type: 'text', default: "0,9" },
+    { name: 'xNuts', caption: 'vertical nut holes (indexes starting at 0)', type: 'text', default: "0,9" },
+    { name: 'yHoles', caption: 'horizontal screw holes (indexes starting at 0)', type: 'text', default: "1,2,3,4,5,6,7,8" },
+    { name: 'yNuts', caption: 'horizontal nut holes (indexes starting at 0)', type: 'text', default: "1,8" }
+    
+  ];
+}
+
+
+function main(params) {
+    cylresolution=(params.quality == "1")? 64:16;
+    beam_width=params.beam_width;
+    hole_radius=params.hole_radius;
+    length=params.length;
+    nut_radius=params.nut_radius;
+    nut_height=params.nut_height;
+    xHoles = params.xHoles.split(',').map(function(n) { return parseInt(n, 10) });
+    xNuts = params.xNuts.split(',').map(function(n) { return parseInt(n, 10) });
+    yHoles = params.yHoles.split(',').map(function(n) { return parseInt(n, 10) });
+    yNuts = params.yNuts.split(',').map(function(n) { return parseInt(n, 10) });
+    return xBeam_adv(length, xHoles, xNuts, yHoles, yNuts);
+}
+
+function xHole(i) {
+    return CSG.cylinder( {
+        start: [-1, beam_width/2, i*beam_width + beam_width/2],
+        end: [beam_width+1, beam_width/2, i*beam_width + beam_width/2],
+        radius: hole_radius,
+        resolution: cylresolution
+    } );
+}
+
+function yHole(i) {
+    return CSG.cylinder( {
+        start: [beam_width/2, -1, i*beam_width + beam_width/2],
+        end: [beam_width/2, beam_width+1, i*beam_width + beam_width/2],
+        radius: hole_radius,
+        resolution: cylresolution
+    } );
+}
+
+function zBeam(length) {
+    var cube = CSG.cube({
+        center: [beam_width/2, beam_width/2, (length*beam_width)/2],
+        radius: [beam_width/2, beam_width/2, (length*beam_width)/2]
+        });
+    var holes = [];
+    for (var i = 0; i < length; i++)
+    {
+        holes.push(xHole(i));
+        holes.push(yHole(i)); 
+    }
+    var beam = cube.subtract(holes);
+    return beam;
+}
+
+function zBeam_adv(length, xHoles, xNuts, yHoles, yNuts) {
+    OpenJsCad.log(length);
+    var cube = CSG.cube({
+        center: [beam_width/2, beam_width/2, (length*beam_width)/2],
+        radius: [beam_width/2, beam_width/2, (length*beam_width)/2]
+        });
+    var holes = [];
+    xHoles.map(function(i) { holes.push(xHole(i)) });
+    xNuts.map(function(i) { holes.push(xNut(i)) });
+    yHoles.map(function(i) { holes.push(yHole(i)) });
+    yNuts.map(function(i) { holes.push(yNut(i)) });
+
+    var beam = cube.subtract(holes);
+    return beam;
+}
+
+function yBeam() {
+    return translateBeam(zBeam.apply(this, arguments).rotateX(-90), [0,0,1]);
+}
+
+function xBeam() {
+    return translateBeam(zBeam.apply(this, arguments).rotateY(90), [0,0,1]);
+}
+
+function yBeam_adv() {
+    return translateBeam(zBeam_adv.apply(this, arguments).rotateX(-90), [0,0,1]);
+}
+
+function xBeam_adv() {
+    return translateBeam(zBeam_adv.apply(this, arguments).rotateY(90), [0,0,1]);
+}
+
+function translateBeam(beam, t_vector) {
+    return beam.translate(t_vector.map(function(n) { return beam_width*n; }));
+};
+
+function xNut(i) {
+    return hexagon(nut_radius, nut_height).rotateY(90).translate([0,beam_width/2,i*beam_width+beam_width/2]);
+}
+
+function yNut(i) {
+    return hexagon(nut_radius, nut_height).rotateX(-90).translate([beam_width/2,0,i*beam_width+beam_width/2]);
+}
+
+function hexagon(radius, height)
+{
+  var vertices=[];
+  for(var i=0; i < 6; i++)
+  {
+    var point=CSG.Vector2D.fromAngleDegrees(-i*60).times(radius).toVector3D(0);
+    vertices.push(new CSG.Vertex(point));
+  }
+  var polygon=new CSG.Polygon(vertices);
+  var hexagon=polygon.extrude([0,0,height]);
+  return hexagon;
+}
+
+</textarea><br>
+<input type="submit" value="Update" onclick="updateSolid(); return false;">
+<br><br>
+</body>
+</html>
