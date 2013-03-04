@@ -25,9 +25,9 @@ function getParameterDefinitions() {
       captions: ["Draft","High"], 
       default: 0,
     },    
-    { name: 'beam_width', caption: 'spacing between holes', type: 'float', default: 8 },
-    { name: 'hole_radius', caption: 'radius of holes', type: 'float', default: 2.4 },
-    { name: 'length', caption: 'beam length', type: 'int', default: 10 }
+    { name: 'beam_width', caption: 'beam width / spacing between holes (in mm)', type: 'float', default: 8 },
+    { name: 'hole_radius', caption: 'radius of holes (in mm)', type: 'float', default: 2.4 },
+    { name: 'length', caption: 'beam length (in num of holes)', type: 'int', default: 10 }
   ];
 }
 
